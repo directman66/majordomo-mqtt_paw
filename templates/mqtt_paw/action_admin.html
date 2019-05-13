@@ -1,1 +1,112 @@
+VIEW_MODE: [#VIEW_MODE#]
+TAB: [#TAB#]
+TITLE: [#TITLE#]
+DATASOURCE: [#DATA_SOURCE#]
+
+<!-- table zwave_devices search -->
+
+
+	 <ul class="nav nav-tabs">
+ [#if VIEW_MODE=""||VIEW_MODE="update_log"#]
+<li [#if TAB=="" || TAB=="settings" #] class="active" [#endif#]><a href="?data_source=<#DATA_SOURCE#>&view_mode=&id=<#ID#>&tab=settings">Settings</a> </li>
+<li [#if TAB=="help" #] class="active" [#endif#]><a href="?view_mode=<#VIEW_MODE#>&tab=help">Help</a> </li>	
+
+<li [#if TAB=="cicle" #] class="active" [#endif#]>
+
+	[#if CYCLERUN==1#]
+		<span class="label label-success" title="Статус цикла"><a href="?view_mode=cycle_start"  title="Restart  cycle" ><font color="white" >Цикл запущен</span></font></a>
+	[#else#]
+		<span class="label label-danger" title="Статус цикла"><a href="?view_mode=cycle_start"  title="Start  cycle" ><font color="white" >Цикл остановлен</font></span></a>
+	[#endif#]
+
+
+
+
+
+ </li>	
+
+
+
+</ul>
+ [#endif#] 
+
+ <!-- action usual -->
+ <!-- table mqtt search -->
+ [#if TAB="" || TAB="devices"#]
+ [#if VIEW_MODE=""#] [#inc devices.html#] [#endif#]
+ [#endif#]
+
+ [#if VIEW_MODE="view_mqtt"#]
+	 <ul class="nav nav-tabs">
+<li [#if TAB=="edit_device" #] class="active" [#endif#]><a href="?data_source=<#DATA_SOURCE#>&view_mode=view_mqtt&id=<#ID#>&tab=edit_device">Edit device</a> </li>
+<li [#if TAB=="edit_parametrs" #] class="active" [#endif#]><a href="?data_source=<#DATA_SOURCE#>&view_mode=view_mqtt&id=<#ID#>&tab=edit_parametrs">Parameters</a> </li>
+<li [#if TAB=="view_det" #] class="active" [#endif#]><a href="?data_source=<#DATA_SOURCE#>&view_mode=view_mqtt&id=<#ID#>&tab=view_det">Detail</a> </li>
+<!--<li [#if TAB=="edit_data" #] class="active" [#endif#]><a href="?data_source=<#DATA_SOURCE#>&view_mode=view_mqtt&id=<#ID#>&tab=edit_data">Data</a> </li> -->
+</ul>
+ [#endif#]
+
+
+  [#if TAB="edit_device"#]
+  [#inc edit_device.html#]
+  [#endif#]
+
+
+  [#if TAB="view_det"#]
+  [#inc view_det.html#]
+  [#endif#]
+
+  [#if TAB="edit_parametrs"#]
+  [#inc edit_parametrs.html#]
+  [#endif#]
+
+
+
+  [#if TAB="edit_data"#]
+  [#inc mqtt_search_admin.html#]
+  [#endif#]
+
+
+ <!-- / table mqtt search -->
+ <!-- table mqtt edit -->
+ [#if VIEW_MODE="edit_mqtt"#]
+   [#inc mqtt_edit.html#]
+ [#endif VIEW_MODE#]
+ <!-- / table mqtt edit -->
+ <!-- table mqtt view --> 
+ [#if VIEW_MODE="view_mqtt"#]
+   [#inc mqtt_view.html#]
+ [#endif VIEW_MODE#]
+ <!-- / table mqtt view -->
+
+[#endif#]
+
+[#if TAB="groups"#] [#inc groups.html#] [#endif#]
+[#if TAB="log"#] [#inc log.html#] [#endif#]
+[#if TAB="log2"#] [#inc log2.html#] [#endif#]
+[#if TAB="" || TAB="settings"#] [#inc settings.html#] [#endif#]
+[#if TAB="service"#] [#inc service.html#] [#endif#]
+[#if TAB="map"#] 
+
+
+
+
+	 <ul class="metro">
+
+<li [#if  VIZ=="" || VIZ=="1" #] class="active" [#endif#]><a href="?data_source=<#DATA_SOURCE#>&view_mode=&id=<#ID#>&tab=map&viz=1">VIZ</a> </li>
+<li [#if VIZ=="2" #] class="active" [#endif#]><a href="?data_source=<#DATA_SOURCE#>&view_mode=&id=<#ID#>&tab=map&viz=2">Graphwiz</a> </li>
+</ul>
+
+
+
+[#if VIZ=="" || VIZ=="1" #] [#inc viz.html#]  [#endif#]
+[#if VIZ=="2" #] [#inc graphwiz.html#]  [#endif#] 
+
+
+[#endif#]
+
+
+
+[#if TAB="help"#] [#inc help.html#] [#endif#]
+
+
 
