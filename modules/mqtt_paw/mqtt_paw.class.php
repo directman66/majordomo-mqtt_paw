@@ -1,481 +1,224 @@
-<?php
-/**
-* mqtt_paw 
-* @package project
-* @author Wizard <sergejey@gmail.com>
-* @copyright http://majordomo.smartliving.ru/ (c)
-* @version 0.1 (wizard, 19:05:26 [May 13, 2019])
-*/
-//
-//
-class mqtt_paw extends module {
-/**
-* mqtt_paw
-*
-* Module class constructor
-*
-* @access private
-*/
-function __construct() {
-  $this->name="mqtt_paw";
-  $this->title="mqtt_paw";
-  $this->module_category="<#LANG_SECTION_DEVICES#>";
-  $this->checkInstalled();
-}
-/**
-* saveParams
-*
-* Saving module parameters
-*
-* @access public
-*/
-function saveParams($data=1) {
- $p=array();
- if (IsSet($this->id)) {
-  $p["id"]=$this->id;
- }
- if (IsSet($this->view_mode)) {
-  $p["view_mode"]=$this->view_mode;
- }
- if (IsSet($this->edit_mode)) {
-  $p["edit_mode"]=$this->edit_mode;
- }
- if (IsSet($this->tab)) {
-  $p["tab"]=$this->tab;
- }
- return parent::saveParams($p);
-}
-/**
-* getParams
-*
-* Getting module parameters from query string
-*
-* @access public
-*/
-function getParams() {
-  global $id;
-  global $mode;
-  global $view_mode;
-  global $edit_mode;
-  global $tab;
-  if (isset($id)) {
-   $this->id=$id;
-  }
-  if (isset($mode)) {
-   $this->mode=$mode;
-  }
-  if (isset($view_mode)) {
-   $this->view_mode=$view_mode;
-  }
-  if (isset($edit_mode)) {
-   $this->edit_mode=$edit_mode;
-  }
-  if (isset($tab)) {
-   $this->tab=$tab;
-  }
-}
-/**
-* Run
-*
-* Description
-*
-* @access public
-*/
-function run() {
- global $session;
-  $out=array();
-  if ($this->action=='admin') {
-   $this->admin($out);
-  } else {
-   $this->usual($out);
-  }
-  if (IsSet($this->owner->action)) {
-   $out['PARENT_ACTION']=$this->owner->action;
-  }
-  if (IsSet($this->owner->name)) {
-   $out['PARENT_NAME']=$this->owner->name;
-  }
-  $out['VIEW_MODE']=$this->view_mode;
-  $out['EDIT_MODE']=$this->edit_mode;
-  $out['MODE']=$this->mode;
-  $out['ACTION']=$this->action;
-  $this->data=$out;
-  $p=new parser(DIR_TEMPLATES.$this->name."/".$this->name.".html", $this->data, $this);
-  $this->result=$p->result;
-}
-/**
-* BackEnd
-*
-* Module backend
-*
-* @access public
-*/
-function admin(&$out) {
- if (isset($this->data_source) && !$_GET['data_source'] && !$_POST['data_source']) {
-  $out['SET_DATASOURCE']=1;
- }
 
-        if ((time() - gg('cycle_mqtt_pawRun')) < 360*2 ) {
-			$out['CYCLERUN'] = 1;
-		} else {
-			$out['CYCLERUN'] = 0;
-		}
 
+[#if VIEW_MODE!="0"#] 
 
-//$seen=SQLSelectOne("select max(FIND) FIND from zigbee2mqtt_log where MESSAGE='online'  ");
-//$seen=SQLSelectOne("select max(FIND) FIND from zigbee2mqtt_log   ");
 
 
 
 
 
+<table align="center" >
 
- $this->getConfig();
- $out['MQTT_DEBUG']=$this->config['MQTT_DEBUG'];
 
 
-//define("ZMQTT_DEBUG", $this->config['MQTT_DEBUG']);
-define("ZMQTT_DEBUG", "1");
 
 
+[#begin DEVICES#]
 
- $out['ZMQTT_DEBUG']=ZMQTT_DEBUG;
+ <tr>
+  <td>[#TITLE#]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</td>
 
- $out['MQTT_CLIENT']=$this->config['MQTT_CLIENT'];
- $out['MQTT_HOST']=$this->config['MQTT_HOST'];
- $out['MQTT_PORT']=$this->config['MQTT_PORT'];
- $out['MQTT_ENABLE']=$this->config['MQTT_ENABLE'];
- $out['Z2M_LOGMODE']=$this->config['Z2M_LOGMODE'];
-// $out['Z2M_LOGMODE']='deb';
+<!--  <td style="vertical-align:top"> -->
+  <td > 
+	[#if ONLINE!=""#]
+		[#if ONLINE==1#]
+			<span class="label label-success" title="<#LANG_XIMI_APP_ONLINE#>">Online</span>
+		[#else#]
+			<span class="label label-warning" title="<#LANG_XIMI_APP_OFFLINE#>">Offline</span>
+		[#endif#]
+	[#else#]
+		&nbsp;
+	[#endif#]
+ </td> 
 
- $out['ZIGBEE2MQTTPATH']=$this->config['ZIGBEE2MQTTPATH'];
- $out['MQTT_QUERY']=$this->config['MQTT_QUERY'];
 
- if (!$out['MQTT_HOST']) {
-  $out['MQTT_HOST']='localhost';
- }
 
+  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="?view_mode=getinfo&id=[#ID#]" title="#[#CCOLOR#]  [#CURRENTCOLOR#]" >
+[#if TURN="23"#]
+<font style="background-color:#[#CCOLOR#]"	 title="#[#CCOLOR#]  [#CURRENTCOLOR#]"> 
+<i class="glyphicon glyphicon-ok-circle"></i>
+</font> 
+[#else#]
+<i class="glyphicon  glyphicon-remove-circle"></i></a>
+[#endif#]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</td>
 
- if (!$out['MQTT_CLIENT']) {
-  $out['MQTT_CLIENT']='md_paw';
- }
 
 
- if (!$out['MQTT_PORT']) {
-  $out['MQTT_PORT']='1883';
- }
- if (!$out['MQTT_QUERY']) {
-  $out['MQTT_QUERY']='PAW/#';
- }
 
- $out['MQTT_USERNAME']=$this->config['MQTT_USERNAME'];
- $out['MQTT_PASSWORD']=$this->config['MQTT_PASSWORD'];
- $out['MQTT_AUTH']=$this->config['MQTT_AUTH'];
 
+ <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
-     if ($this->tab=='help') {
-$res=SQLSelect("SELECT * FROM zigbee2mqtt_devices_list ");
-$out['DEVICE_LIST']=$res;
+<form action="?" method="get" class="form-horizontal" name="color_change">
+   <input type="hidden" name="view_mode" value="colorpicker">
+<!--   <div class="form-group"> -->
+  <div class="form-group">
+      <div class="col-sm-5">      
 
-}
+<script src="<#ROOTHTML#>templates/magichome/jscolor.js"></script>
+<input class="jscolor" onchange="document.color_change.submit();" value="[#CCOLOR#][#id#]" size="4" name="colorpicker"  id="colorpicker"> 
 
+</form>
 
 
 
+</td>
 
 
+  <td>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="?view_mode=turnon&id=[#ID#]&tab=info" class="btn btn-default" title="Включить"><i class="glyphicon glyphicon-ok"></i></a> 
+  <a href="?view_mode=turnoff&id=[#ID#]&tab=info" class="btn btn-default" title="Выключить"><i class="glyphicon glyphicon-remove"></i></a> 
 
 
-// if (($this->view_mode=='update_log')&&($this->tab=='log')) {
- if ($this->tab=='log') {
 
-// if ($this->update_log=='update_log') {
- $this->getConfig();
 
-global $file;
-global $limit;
-$zigbee2mqttpath=$this->config['ZIGBEE2MQTTPATH'];
-if ($this->view_mode=='update_log') {$filename=$zigbee2mqttpath.'/data/log/'.$file.'/log.txt';} 
-else 
+<!--
+alert('?view_mode=customhex_'+jscolor+'&id=[#ID#]')
+document.location.href = '?data_source=<#DATA_SOURCE#>&view_mode=customhex_'+jscolor+'&id=[#ID#]&tab=info';
+window.document.location.href='?data_source=<#DATA_SOURCE#>&view_mode=customhex_'+jscolor+'&id=[#ID#]&tab=info'
+window.document.location.href='?data_source=<#DATA_SOURCE#>&view_mode=customhex_'+jscolor+'&id=[#ID#]&tab=info'
+-->
 
-{
 
-$zigbee2mqttpath=$this->config['ZIGBEE2MQTTPATH'];
 
-            $path = $zigbee2mqttpath.'/data/log';
 
 
-            if ($handle = opendir($path)) {
-                $files = array();
 
-                while (false !== ($entry = readdir($handle))) {
-                    if ($entry == '.' || $entry == '..')
-                        continue;
+<!--               
+                <link rel='stylesheet' href='<#ROOTHTML#>js/spectrum/spectrum.min.css' />
+                <script src='<#ROOTHTML#>js/spectrum/spectrum.min.js'></script>
+                <input type="text" value="[#VALUE#]" name="[#PARAM_NAME#]_value" class="form-control" id="[#PARAM_NAME#]_value">
+<!--               
+<select size="1" name="selectType"  onChange="selectServers()" style="width:160px;">
 
-                    $files[] = array('TITLE' => $entry);
-                }
+                <link rel='stylesheet' href='<#ROOTHTML#>js/spectrum/spectrum.min.css' />
+                <script src='<#ROOTHTML#>js/spectrum/spectrum.min.js'></script>
+                <link rel='stylesheet' href='?view_mode=changeсolor_[#VALUE#]&id=[#ID#]&tab=info' />
+                <input type="text" value="[#VALUE#]" name="[#PARAM_NAME#]_value" class="form-control" id="[#PARAM_NAME#]_value">
+                <script type="text/javascript">
+                    $("#[#PARAM_NAME#]_value").spectrum({
+                        preferredFormat: "hex",
+                        showInput: true,
+                        chooseText: "OK",
+                        cancelText: "<#LANG_CANCEL#>"
+                    });
+                </script>
+$page = file_get_contents("http://www.domain.com/filename");
+<input type="text" value="[#CCOLOR#]" name="[#PARAM_NAME#]_value" class="form-control" id="[#PARAM_NAME#]_value" onChange='file_get_contents("http://188.226.32.227/admin.php?&md=magichome&?view_mode=customhex_this.value&id=[#ID#]&tab=info");'>
+<input type="text" value="[#CCOLOR#]" name="[#PARAM_NAME#]_value" class="form-control" id="[#PARAM_NAME#]_value" onChange='file_get_contents("alert(this.value);");'>
+<input type="text" value="[#CCOLOR#]" name="[#PARAM_NAME#]_value" class="form-control" id="[#PARAM_NAME#]_value" onChange='file_get_contents("alert(this.value);");'>
+////////////////////////////
+                <link rel='stylesheet' href='<#ROOTHTML#>js/spectrum/spectrum.min.css' />
+                <script src='<#ROOTHTML#>js/spectrum/spectrum.min.js'></script>
+                <link rel='stylesheet' href='?view_mode=changeсolor_[#VALUE#]&id=[#ID#]&tab=info' />
+<input type="text" value="[#CCOLOR#]" name="[#PARAM_NAME#]_value" class="form-control" id="[#PARAM_NAME#]_value" onChange='file_get_contents("alert(this.value);");'>
+                <script type="text/javascript">
+                    $("#[#PARAM_NAME#]_value").spectrum({
+                        preferredFormat: "hex",
+                        showInput: true,
+                        chooseText: "OK",
+                        cancelText: "<#LANG_CANCEL#>"
+                    });
+                </script>
+
+-->
+
+<!--
+<div>
+<input type="text" value="[#CCOLOR#]" name="[#PARAM_NAME#]_value" class="form-control" id="[#PARAM_NAME#]_value" onChange='alert(this.value);'>
+                <script type="text/javascript">
+                    $("#[#PARAM_NAME#]_value").spectrum({
+                        preferredFormat: "hex",
+                        showInput: true,
+                        chooseText: "OK",
+                        cancelText: "<#LANG_CANCEL#>"
+                    });
+                </script>
+</div>
+
+
+                <link rel='stylesheet' href='<#ROOTHTML#>js/spectrum/spectrum.min.css' />
+                <script src='<#ROOTHTML#>js/spectrum/spectrum.min.js'></script>
+                <link rel='stylesheet' href='?view_mode=changeсolor_[#VALUE#]&id=[#ID#]&tab=info' />
+<input type="text" value="[#CCOLOR#]" name="[#PARAM_NAME#]_value" class="form-control" id="[#PARAM_NAME#]_value" onChange='file_get_contents("alert(this.value);");'>
+                <script type="text/javascript">
+                    $("#[#PARAM_NAME#]_value").spectrum({
+                        preferredFormat: "hex",
+                        showInput: true,
+                        chooseText: "OK",
+                        cancelText: "<#LANG_CANCEL#>"
+                    });
+                </script>
+
+-->
+
+
+
+
+
+
+<!--- 
+<script src='<#ROOTHTML#>/js/spectrum/spectrum.min.js'></script>
+<link rel='stylesheet' href='<#ROOTHTML#>/js/spectrum/spectrum.min.css' />
+
+<div class="device-widget controller" onClick='callMethod("%.object_title%.switch");'>
+    <div class="device-icon %.status|"off;on"%"></div>
+<div class="device-header"><span>%.object_description%</span>
+    <input type="text" id="color%.object_id%" class="colorpicker" value="%.colorSaved%" onChange='callMethod("%.object_title%.setColor","color="+encodeURIComponent(this.value));'/>
+</div>
+
+<script>
+    $("#color%.object_id%").spectrum({
+        preferredFormat: "hex",
+        showInput: true,
+        chooseText: "OK",
+        cancelText: "<#LANG_CANCEL#>"
+    });
+</script>
+</div> 
+-->
+<!--
+ <a href="?view_mode=custom50@50@50&id=[#ID#]"class="btn btn-default" title="Custom color"><i class="glyphicon glyphicon"></i></a> 
+  <a href="?view_mode=brightness50&id=[#ID#]"class="btn btn-default" title="50% brightness"><i class="glyphicon glyphicon"></i></a> 
+  <a href="?view_mode=brightness100&id=[#ID#]"class="btn btn-default" title="100% brightness"><i class="glyphicon glyphicon"></i></a> 
+-->
+</td><td>&nbsp;&nbsp;
+<table border=0>
+<tr><td>
+  <a href="?view_mode=setcolorhex_ff0000&id=[#ID#]&tab=info" class="btn btn-danger" color="red" title="Сменить цвет на красный"><i class="glyphicon glyphicon-asterisk"></i></a> 
+</td><td>
+  <a href="?view_mode=setcolorhex_00ff00&id=[#ID#]&tab=info" class="btn btn-success" title="Сменить цвет на зеленый"><i class="glyphicon glyphicon-asterisk"></i></a> 
+</td><td>
+  <a href="?view_mode=setcolorhex_0000ff&id=[#ID#]&tab=info" class="btn btn-primary" title="Сменить цвет на синий"><i class="glyphicon glyphicon-asterisk"></i></a> 
+</td></tr><tr><td>
+  <a href="?view_mode=setcolorhex_ffffff&id=[#ID#]&tab=info" class="btn btn-default" title="Сменить цвет на белый"><i class="glyphicon glyphicon-asterisk"></i></a> 
+</td><td>
+  <a href="?view_mode=setcolorhex_ffff00&id=[#ID#]&tab=info" class="btn btn-warning" title="Сменить цвет на желтый"><i class="glyphicon glyphicon-asterisk"></i></a> 
+</td><td>
+  <a href="?view_mode=setcolorhex_00ffff&id=[#ID#]&tab=info" class="btn btn-info" title="Сменить цвет на голубой"><i class="glyphicon glyphicon-asterisk"></i></a> 
+</tr></table>
+
+</td>
+
+
+
+ </tr>
+
+ [#end DEVICES#]
+
+</table>
+
+[#else DEVICES#]
+<p>No devices discovered yet</p>
+
+[#endif DEVICES#]
+
+
+
+[#endif VIEW_MODE#]
 
-                sort($files);
-            }
-$cnt=count($files);
 
-//if (ZMQTT_DEBUG=="1" ) debmes($cnt,'zigbee2mqtt');
-if (ZMQTT_DEBUG=="1" ) debmes($files[$cnt-1]['TITLE'],'zigbee2mqtt');
-
-$lastfile=$files[$cnt-1]['TITLE'];
-$filename=$zigbee2mqttpath.'/data/log/'.$lastfile.'/log.txt';
-
-
-} 
-
-$out['FN']=$filename;
-//$out['FN']="1234";
-
-//$a=file_get_contents ($filename, null,null,1000);
-
-
-//$tmp=file($filename); 
-//$tmp=file_get_contents ($filename, null,null,1000);
-/*
-
-if (filesize ($filename)>0) {
-
-$fz=filesize ($filename);
-
-$file = new SplFileObject($filename, 'r');
-
-
-
-$file->seek(PHP_INT_MAX);
-
-$last_line = $file->key();
-debmes($last_line, 'zg1');
-
-$max=500;
-if  ($max>$last_line ) {$max=$last_line;}
-
-$lines = new LimitIterator($file, $last_line - $max, $last_line);
-
-$tmp=(iterator_to_array($lines));
-}
-
-
-
-$newtmp=array_reverse($tmp); 
-$a="";
-foreach ($newtmp as $value) 
-{ 
-$a.= $value; 
-} 
-
-$a =  str_replace( array("\r\n","\r","\n") , '<br>' , $a);
-$out['LOG']=$a;
-*/
-
-            $path = $zigbee2mqttpath.'/data/log';
-
-            if ($handle = opendir($path)) {
-                $files = array();
-
-                while (false !== ($entry = readdir($handle))) {
-                    if ($entry == '.' || $entry == '..')
-                        continue;
-
-                    $files[] = array('TITLE' => $entry);
-                }
-
-                sort($files);
-            }
-
-            $out['FILES'] = $files;
-
-//$this->search_mqtt($out);
-
-
-
-
-
-                    
-
-//$vm1=$filename;
-// echo "<script type='text/javascript'>";
-// echo "alert('$vm1');";
-// echo "</script>";
-
-// $this->redirect("?tab=log");
-
-}
-
-
-
-
-//$vm1=$this->view_mode;
-// echo "<script type='text/javascript'>";
-// echo "alert('$vm1');";
-// echo "</script>";
-
-
- if ($this->view_mode=='cycle_start') {
-setGlobal('cycle_zigbee2mqttControl','start'); 
-$this->redirect("?");
-}
-
-
- if ($this->view_mode=='send_test_mqtt') {
-
-
-global $mqttsendpath;
-global $mqttsendvalue;
-if (ZMQTT_DEBUG=="1" ) debmes('send custom message topic: '.$mqttsendpath.' value:'.$mqttsendvalue, 'zigbee2mqtt');
-
-//  $this->sendcommand($mqttsendpath, $mqttsendvalue);
-//  $this->sendcommand('zigbee2mqtt/bridge/config/devices', '');
-
-$this->redirect("?tab=log");
-
-
-}
-
-
-
-
-
-
-
-//$vm1=$this->view_mode;
-// echo "<script type='text/javascript'>";
-// echo "alert('$vm1');";
-// echo "</script>";
-
-
-
- if ($this->view_mode=='update_settings') {
-
-
-
-   global $mqtt_client;
-   global $mqtt_debug;
-   global $mqtt_host;
-   global $mqtt_username;
-   global $mqtt_password;
-   global $mqtt_auth;
-   global $mqtt_port;
-   global $mqtt_enable;
-   global $z2m_logmode2;
-   global $mqtt_query;
-   global $zigbee2mqttpath;
-//echo $zigbee2mqttpath;
-
-//$vm1=$this->view_mode;
-// echo "<script type='text/javascript'>";
-// echo "alert('$z2m_logmode');";
-// echo "</script>";
-
-
-   $this->config['MQTT_CLIENT']=trim($mqtt_client);
-   $this->config['MQTT_DEBUG']=trim($mqtt_debug);
-   $this->config['ZIGBEE2MQTTPATH']=trim($zigbee2mqttpath);
-   $this->config['MQTT_HOST']=trim($mqtt_host);
-   $this->config['MQTT_USERNAME']=trim($mqtt_username);
-   $this->config['MQTT_PASSWORD']=trim($mqtt_password);
-   $this->config['MQTT_AUTH']=(int)$mqtt_auth;
-   $this->config['MQTT_ENABLE']=(int)$mqtt_enable;
-   $this->config['MQTT_PORT']=(int)$mqtt_port;
-   $this->config['MQTT_QUERY']=trim($mqtt_query);
-   $this->config['Z2M_LOGMODE']=trim($z2m_logmode2);
-
-
-// $this->sendcommand('zigbee2mqtt/bridge/config/log_level', $z2m_logmode);
-
-
-$cmd='
-include_once(DIR_MODULES . "zigbee2mqtt/zigbee2mqtt.class.php");
-$z2m= new zigbee2mqtt();
-$z2m->sendcommand("zigbee2mqtt/bridge/config/log_level", "'.$z2m_logmode2.'");
-';
-// SetTimeOut('z2m_set_dubug',$cmd, '1'); 
-
-
-
-
-   $this->saveConfig();
-
-   setGlobal('cycle_mqtt_pawControl', 'restart');
-
-   $this->redirect("?tab=settings");
- }
-
- if (!$this->config['MQTT_HOST']) {
-  $this->config['MQTT_HOST']='localhost';
-  $this->saveConfig();
- }
- if (!$this->config['MQTT_PORT']) {
-  $this->config['MQTT_PORT']='1883';
-  $this->saveConfig();
- }
-
- if (!$this->config['ZIGBEE2MQTTPATCH']) {
-  $this->config['ZIGBEE2MQTTPATCH']='/opt/zigbee2mqtt/';
-  $this->saveConfig();
- }
-
-
- if (!$this->config['MQTT_QUERY']) {
-  $this->config['MQTT_QUERY']='PAW/#';
-  $this->saveConfig();
- }
-
-
-
-
-
-
-
-
-
-
-
- }
-/**
-* FrontEnd
-*
-* Module frontend
-*
-* @access public
-*/
-function usual(&$out) {
- $this->admin($out);
-}
- function processCycle() {
-$this->mqtt_paw_devices_cloudscan();
-  //to-do
- }
-/**
-* Install
-*
-* Module installation routine
-*
-* @access private
-*/
-
-
- function mqtt_paw_devices_cloudscan() {
-  require(DIR_MODULES.$this->name.'/mqtt_paw_devices_scan.inc.php');
- }
-
-
-
- function install($data='') {
-  parent::install();
-  $this->getConfig();
-  $this->config['POLL_PERIOD']=10;
-  $this->saveConfig();
- }
-
-// --------------------------------------------------------------------
-}
-/*
-*
-* TW9kdWxlIGNyZWF0ZWQgTWF5IDEzLCAyMDE5IHVzaW5nIFNlcmdlIEouIHdpemFyZCAoQWN0aXZlVW5pdCBJbmMgd3d3LmFjdGl2ZXVuaXQuY29tKQ==
-*
-*/
